@@ -9,6 +9,9 @@ from django.db.models import Avg
 from estudiantes.models import Estudiante
 #from estudiantes.api.permissions import PermissionsOfStudents
 #from profesor.api.permissions import PermissionsOfProfessor
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAdminUser
+from django.db.models import Avg
 
 
 
@@ -17,6 +20,7 @@ class AsignaturasVS(ModelViewSet):
     serializer_class = AsignaturaSerializers
     #permission_classes = [PermissionsOfProfessor,PermissionsOfStudents]
 
+    @permission_classes([IsAdminUser])
     def perform_create(self, serializer):
         name_subject = serializer.validated_data.get('name')
         id_profesor = serializer.validated_data.get('profesor')
@@ -69,27 +73,29 @@ class CometarioDetailAV(APIView):
 
         try:
             comentario = ComentarioAsignatura.objects.get(id=pk)
-            serializers = ComentarioSerializers(comentario, data=request.data)
-            if serializers.is_valid():
-                serializers.save()
-                return Response(serializers.data, status.HTTP_200_OK)
+            if comentario.estudiante == request.user:
+                serializers = ComentarioSerializers(comentario, data=request.data)
+                if serializers.is_valid():
+                    serializers.save()
+                    return Response(serializers.data, status.HTTP_200_OK)
+                else:
+                    return Response(serializers.errors, status.HTTP_400_BAD_REQUEST)
             else:
-                return Response(serializers.errors, status.HTTP_400_BAD_REQUEST)
+                return Response({"Estudiante":"No puede modificar este comentario"})
         except ComentarioAsignatura.DoesNotExist:
             return Response({"Error": "No existe un comentario con ese ID."}, status.HTTP_404_NOT_FOUND)
         
     def delete(self, request, pk):
         try:
             comentario = ComentarioAsignatura.objects.get(id=pk)
-            comentario.delete()
-            return Response(status.HTTP_202_ACCEPTED)
+            if comentario.estudiante == request.user:
+                comentario.delete()
+                return Response(status.HTTP_202_ACCEPTED)
+            else:
+                return Response({"Estudiante":"No puede eliminar este comentario"})
         except ComentarioAsignatura.DoesNotExist:
             return Response({"Error": "No existe un comentario con ese ID."}, status.HTTP_404_NOT_FOUND)
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.db.models import Avg
 
 class NotasListAV(APIView):
 
@@ -101,6 +107,8 @@ class NotasListAV(APIView):
         except Nota.DoesNotExist:
             return Response({"Error": "No existe una nota con ese ID."}, status=status.HTTP_404_NOT_FOUND)
 
+
+    #Hacer validaciones para cuando un profesor inserte una nota a un estudiante este reciva la asignatura
     def post(self, request, pk):
         try:
             estudiante_pk = pk
@@ -149,19 +157,25 @@ class NotasDetailAV(APIView):
     def put(self, request, pk):
         try:
             queryset = Nota.objects.get(id=pk)
-            serializers = NotaSerializers(queryset, data=request.data)
-            if serializers.is_valid():
-                serializers.save()
-                return Response(serializers.data, status.HTTP_200_OK)
+            if queryset.profesor == request.user:
+                serializers = NotaSerializers(queryset, data=request.data)
+                if serializers.is_valid():
+                    serializers.save()
+                    return Response(serializers.data, status.HTTP_200_OK)
+                else:
+                    return Response(serializers.errors, status.HTTP_400_BAD_REQUEST)
             else:
-                return Response(serializers.errors, status.HTTP_400_BAD_REQUEST)
+                return Response({"Notas":"No tiene permiso para modificar esta nota"})
         except Nota.DoesNotExist:
             return Response({"Error": {"No existe una nota con ese ID. "}})
 
     def delete(self, request, pk):
         try:
             queryset = Nota.objects.get(id=pk)
-            queryset.delete()
-            return Response(status.HTTP_202_ACCEPTED)
+            if queryset.profesor == request.user:
+                queryset.delete()
+                return Response(status.HTTP_202_ACCEPTED)
+            else:
+                 return Response({"Notas":"No tiene permiso para eliminar esta nota"})
         except Nota.DoesNotExist:
             return Response({"Error": {"No existe una nota con ese ID. "}})

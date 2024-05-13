@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import facultad_list,facultad_detail
+from .views import FacultadListAV,FacultadDetailAV
 
 urlpatterns = [
-    path("",facultad_list, name="facultad-list"),
-    path("<int:pk>/",facultad_detail, name="facultad-detail"),
+    path("",FacultadListAV.as_view(), name="facultad-list"),
+    path("<int:pk>/",FacultadDetailAV.as_view(), name="facultad-detail"),
 ]

@@ -4,7 +4,8 @@ from .serializers import GruposSerializers
 from rest_framework.response import Response
 from rest_framework import status
 from facultad.models import Facultad
-
+from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import permission_classes
 
 class GruposListAV(APIView):
 
@@ -13,6 +14,7 @@ class GruposListAV(APIView):
         serializer = GruposSerializers(grupos, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
+    @permission_classes([IsAdminUser])
     def post(self, request):
         serializer = GruposSerializers(data=request.data)
         if serializer.is_valid():
@@ -36,6 +38,7 @@ class GrupoDetailAV(APIView):
         except Grupo.DoesNotExist:
             return Response({"Error": "No existe un grupo con ese ID."}, status.HTTP_404_NOT_FOUND)
 
+    @permission_classes([IsAdminUser])
     def put(self, request, pk):
         try:
             grupo = Grupo.objects.get(id=pk)
@@ -48,6 +51,7 @@ class GrupoDetailAV(APIView):
         except Grupo.DoesNotExist:
             return Response({"Error": "No existe un grupo con ese ID."}, status.HTTP_404_NOT_FOUND)
 
+    @permission_classes([IsAdminUser])
     def delete(self, request, pk):
         try:
             grupo = Grupo.objects.get(id=pk)

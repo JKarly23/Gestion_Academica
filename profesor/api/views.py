@@ -3,6 +3,8 @@ from profesor.models import Profesor
 from.serializers import ProfesorSerializers
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAdminUser
 
 
 
@@ -20,6 +22,7 @@ class ProfesorDetailAV(APIView):
         serializer = ProfesorSerializers(profesor)
         return Response(serializer.data)
     
+    @permission_classes([IsAdminUser])
     def put(self, request, pk):
         profesor = Profesor.objects.get(id=pk)
         serializer = ProfesorSerializers(profesor, data=request.data)
@@ -27,6 +30,7 @@ class ProfesorDetailAV(APIView):
             serializer.save()
             return Response(serializer.data, status.HTTP_202_ACCEPTED) 
 
+    @permission_classes([IsAdminUser])
     def delete(self, request, pk):
         profesor = Profesor.objects.get(id=pk)
         profesor.delete()
