@@ -3,10 +3,12 @@ from .serializers import EstudianteSerializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser
+from facultad.api.permissions import IsAuthAdminOrReadOnly
 from rest_framework.decorators import permission_classes
 
 class EstudiantesListAV(APIView):
+
+    permission_classes = [IsAuthAdminOrReadOnly]
 
     def get(self, request):
         estudiantes = Estudiante.objects.all()
@@ -16,6 +18,8 @@ class EstudiantesListAV(APIView):
 
 class EstudiantesDetailAV(APIView):
 
+    permission_classes = [IsAuthAdminOrReadOnly]
+
     def get(self, request, pk):
         try:
             estudiante = Estudiante.objects.get(id=pk)
@@ -24,7 +28,7 @@ class EstudiantesDetailAV(APIView):
         except Estudiante.DoesNotExist:
             return Response({"Error": "No existe un estudiante con ese ID."},status.HTTP_404_NOT_FOUND)
         
-    @permission_classes([IsAdminUser])
+    
     def put(self, request, pk):
         try:
             estudiante = Estudiante.objects.get(id=pk)
@@ -37,7 +41,7 @@ class EstudiantesDetailAV(APIView):
         except Estudiante.DoesNotExist:
             return Response({"Error": "No existe un estudiante con ese ID."}, status.HTTP_404_NOT_FOUND)
         
-    @permission_classes([IsAdminUser])
+    
     def delete(self, request, pk):
         try:
             estudiante = Estudiante.objects.get(id=pk)
