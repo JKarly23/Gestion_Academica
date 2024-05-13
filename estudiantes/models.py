@@ -14,6 +14,7 @@ class Estudiante(models.Model):
     facultad = models.ForeignKey(Facultad, on_delete=models.CASCADE, related_name="facultad_estudiantes")
     ano_docente = models.IntegerField()
     avg_calificacion = models.FloatField(blank=True, null= True)
+    
 
     def __str__(self) -> str:
         return f"{self.user.first_name} + {self.user.last_name}"

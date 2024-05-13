@@ -7,6 +7,7 @@ class Facultad(models.Model):
     cantidad_grupos = models.IntegerField(blank=True, null=True)
     cantidad_estudiantes = models.IntegerField(blank=True, null=True)
     cantidad_profesores = models.IntegerField(blank=True, null=True)
+    logo = models.ImageField(upload_to='media')
 
     def __str__(self):
         return self.name
