@@ -12,7 +12,7 @@ class ProfesorFormsAdmin(forms.ModelForm):
     
 class ProfesorAdmin(admin.ModelAdmin):
     forms = ProfesorFormsAdmin
-    list_display = ('user', 'facultad','asignatura')
+    list_display = ('user', 'facultad')
 
 
 

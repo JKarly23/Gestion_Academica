@@ -2,14 +2,14 @@ from django.db import models
 
 from facultad.models import Facultad
 from user_app.models import Account
-from asignatura.models import Asignatura
+
 
 
 # Create your models here.
 
 
 class Profesor(models.Model):
-    user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name="profesor")
+    user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name="profesor_user")
     facultad = models.ForeignKey(Facultad, on_delete=models.CASCADE, related_name="facultad_profesor")
     
 
