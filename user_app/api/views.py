@@ -43,14 +43,14 @@ def registrar(request):
                 data['asignatura'] = request.data.get('asignatura')
                 asignatura = Asignatura.objects.get(name=data['asignatura'])
                 # Crear el profesor
-                profesor = Profesor.objects.create(
-                    user=account, facultad=facultad,)
                 
-                profesores = Profesor.objects.filter(facultad=facultad, asignatura=asignatura)
+                profesores = Profesor.objects.filter(facultad=facultad,asignatura=asignatura)
                 if profesores:
                     return Response({"Asignatura":"Ya existe un profesor para esta asignatura en esta facultad"})
-
-                asignatura.profesor = profesor
+                profesor = Profesor.objects.create(
+                    user=account, facultad=facultad)
+                profesor.asignatura.add(asignatura)
+                
                 # Actualizar la cantidad de profesor de la facultad
 
                 facultad_id = facultad.id

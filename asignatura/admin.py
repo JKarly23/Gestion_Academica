@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib import admin
 
-from asignatura.models import Asignatura, ComentarioAsignatura,Nota
+from asignatura.models import ComentarioAsignatura,Nota
+from profesor.models import Asignatura
 
 # Register your models here.
 class ComentarioFormsAdmin(forms.ModelForm):
@@ -26,7 +27,7 @@ class AsignaturaFormsAdmin(forms.ModelForm):
 class AsignaturaAdmin(admin.ModelAdmin):
 
     forms = AsignaturaFormsAdmin
-    list_display = ["name","profesor"]    
+    list_display = ["name"]    
 
 
 

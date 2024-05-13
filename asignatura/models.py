@@ -1,19 +1,12 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+
 from estudiantes.models import Estudiante
-from profesor.models import Profesor
+from profesor.models import Profesor,Asignatura
+
 
 
 # Create your models here.
-
-class Asignatura(models.Model):
-    name = models.CharField(max_length=50)
-    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, null=True,blank=True,related_name="profesor")
-    
-    
-    def __str__(self) -> str:
-        return self.name
-
 
 class ComentarioAsignatura(models.Model):
     tema = models.TextField()

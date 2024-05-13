@@ -7,33 +7,53 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Avg
 from estudiantes.models import Estudiante
-#from estudiantes.api.permissions import PermissionsOfStudents
-#from profesor.api.permissions import PermissionsOfProfessor
+from estudiantes.api.permissions import IsEstudianteAuth
+from profesor.api.permissions import IsProfesorAuth
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAdminUser
 from django.db.models import Avg
 
 
 
-class AsignaturasVS(ModelViewSet):
-    queryset = Asignatura.objects.all()
-    serializer_class = AsignaturaSerializers
-    #permission_classes = [PermissionsOfProfessor,PermissionsOfStudents]
+class AsignaturasVS(APIView):
+    
+    def get(self, request):
+        asignaturas = Asignatura.objects.all()
+        serializer = AsignaturaSerializers(asignaturas, many=True)
+        return Response(serializer.data,status=200)
+    
+    @permission_classes([IsAdminUser])
+    def post(self, request):
+        serializer = AsignaturaSerializers(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        else:
+            return Response(serializer.errors, status=400)
+    
+
+class AsignaturasDetailAV(APIView):
+
+    def get(self, request, pk):
+        asignatura = Asignatura.objects.get(id=pk)
+        serializer = AsignaturaSerializers(asignatura)
+        return Response(serializer.data, status=200)
 
     @permission_classes([IsAdminUser])
-    def perform_create(self, serializer):
-        name_subject = serializer.validated_data.get('name')
-        id_profesor = serializer.validated_data.get('profesor')
-        query = Asignatura.objects.filter(name=name_subject)
-        if query.exists():
-             return Response(serializer.errors)
-        profesor = Profesor.objects.get(id=id_profesor.id)
+    def put(self, request, pk):
+        asignatura = Asignatura.objects.get(id=pk)
+        serializer = AsignaturaSerializers(asignatura,data=request.data)
         if serializer.is_valid():
-            serializer.save(name=serializer.validated_data.get('name'), profesor=profesor)
-            print(serializer.data)
-            return Response(serializer.data, status.HTTP_201_CREATED)
+            serializer.save()
+            return Response(serializer.data, status=200)
+        else:
+            return Response(serializer.error, status=400)
 
-        
+    @permission_classes([IsAdminUser])    
+    def delete(self, request, pk):
+        asignatura = Asignatura.objects.get(id=pk)
+        asignatura.delete()
+        return Response(status=200)
 
 
 
@@ -46,7 +66,7 @@ class ComentarioListAV(APIView):
             return Response(serializers.data, status.HTTP_200_OK)
         except ComentarioAsignatura.DoesNotExist:
             return Response({"Error": "No existe un comentario con ese ID."}, status.HTTP_404_NOT_FOUND)
-    
+    @permission_classes([IsEstudianteAuth])
     def post(self, request, pk):
         context = {'asignatura_id':pk}
         serializers = ComentarioSerializers(data=request.data, context=context)
@@ -69,6 +89,7 @@ class CometarioDetailAV(APIView):
         except ComentarioAsignatura.DoesNotExist:
             return Response({"Error": "No existe un comentario con ese ID."}, status.HTTP_404_NOT_FOUND)
     
+    @permission_classes([IsEstudianteAuth])
     def put(self, request, pk):
 
         try:
@@ -84,7 +105,7 @@ class CometarioDetailAV(APIView):
                 return Response({"Estudiante":"No puede modificar este comentario"})
         except ComentarioAsignatura.DoesNotExist:
             return Response({"Error": "No existe un comentario con ese ID."}, status.HTTP_404_NOT_FOUND)
-        
+    @permission_classes([IsEstudianteAuth])    
     def delete(self, request, pk):
         try:
             comentario = ComentarioAsignatura.objects.get(id=pk)
@@ -109,6 +130,7 @@ class NotasListAV(APIView):
 
 
     #Hacer validaciones para cuando un profesor inserte una nota a un estudiante este reciva la asignatura
+    @permission_classes([IsProfesorAuth])
     def post(self, request, pk):
         try:
             estudiante_pk = pk
@@ -153,7 +175,7 @@ class NotasDetailAV(APIView):
             return Response(serializers.data, status.HTTP_200_OK)
         except Nota.DoesNotExist:
             return Response({"Error": {"No existe una nota con ese ID. "}})
-
+    @permission_classes([IsProfesorAuth])
     def put(self, request, pk):
         try:
             queryset = Nota.objects.get(id=pk)
@@ -169,6 +191,7 @@ class NotasDetailAV(APIView):
         except Nota.DoesNotExist:
             return Response({"Error": {"No existe una nota con ese ID. "}})
 
+    @permission_classes([IsProfesorAuth])
     def delete(self, request, pk):
         try:
             queryset = Nota.objects.get(id=pk)
